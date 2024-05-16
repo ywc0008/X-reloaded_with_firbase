@@ -1,7 +1,9 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import { auth } from "../firbase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
+import GithubButton from "../components/github-btn";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export default function CreateAccount() {
   };
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     if (isLoading || name === "" || email === "" || password === "") return;
     try {
       // 계정생성
@@ -41,7 +44,9 @@ export default function CreateAccount() {
       // 유저 이름 설정
       // 리다이렉트 홈페이지
     } catch (e) {
-      //에러 설정
+      if (e instanceof FirebaseError) {
+        setError(e.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -49,7 +54,10 @@ export default function CreateAccount() {
   return (
     <div className="h-full flex flex-col items-center w-96 py-12 px-0">
       <h1 className="text-5xl">Join X</h1>
-      <form className="mt-12 flex flex-col gap-2 w-full" onSubmit={onSubmit}>
+      <form
+        className="mt-12 mb-2 flex flex-col gap-2 w-full"
+        onSubmit={onSubmit}
+      >
         <input
           className="py-2 px-5 rounded-2xl border-none w-full text-base text-black"
           onChange={onChange}
@@ -86,6 +94,13 @@ export default function CreateAccount() {
       {error !== "" ? (
         <span className="text-red-500 font-semibold">{error}</span>
       ) : null}
+      <span className="mt-5">
+        계정이 이미 있나요?
+        <Link className="text-blue-500 pl-2" to="/login">
+          로그인 &rarr;
+        </Link>
+      </span>
+      <GithubButton />
     </div>
   );
 }
