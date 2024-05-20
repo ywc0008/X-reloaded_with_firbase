@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    .gridTemplateColumn {
+      grid-template-columns: 1fr 4fr;
+    }
+    .navBorder{
+        border: 2px solid white;
+    }
+    .navBorderTomato{
+        border: 2px solid tomato;
+    }
+    .fillWhite{
+        fill: white;
+    }
+    .fillTomato{
+        fill: tomato;
+    }
+    .btnBorder{
+        border: 2px solid #1d9bf0;
+    }
+  }
+
 body{
     *{
         box-sizing: border-box;

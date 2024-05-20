@@ -48,7 +48,7 @@ function App() {
     init();
   }, []);
   return (
-    <div className="flex h-screen justify-center">
+    <div className="flex h-screen w-auto justify-center">
       {isLoading ? <LoadingScreen /> : <RouterProvider router={router} />}
     </div>
   );

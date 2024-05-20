@@ -66,7 +66,7 @@ export default function CreateAccount() {
           required
         />
         <input
-          className="py-2 px-5 rounded-2xl border-none w-full text-base cursor-pointer hover:opacity-80 bg-white text-black"
+          className="py-2 px-5 rounded-2xl border-none w-full text-base cursor-pointer hover:opacity-80 bg-blue-500 text-black"
           type="submit"
           value={isLoading ? "로딩중..." : "로그인"}
         />
