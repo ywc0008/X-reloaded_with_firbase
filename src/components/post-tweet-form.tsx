@@ -1,26 +1,66 @@
+import { set } from "firebase/database";
+import { addDoc, collection, updateDoc } from "firebase/firestore";
 import { useState } from "react";
+import { auth, db, storage } from "../firbase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export default function PostTweetForm() {
+  const FILE_SIZE = 5 * 1024 * 1024;
   const [isLoading, setLoading] = useState(false);
   const [tweet, setTweet] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const onChagne = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTweet(e.target.value);
   };
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    {
-      const { files } = e.target;
-      if (files && files.length === 1) {
-        setFile(files[0]);
+    const { files } = e.target;
+    if (files && files.length === 1) {
+      if (files[0].size > FILE_SIZE) {
+        alert("파일 크기가 너무 큽니다. 5MB 이하로 업로드해주세요.");
+        return;
       }
+      setFile(files[0]);
     }
   };
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user || isLoading || tweet === "" || tweet.length > 180) return;
+    try {
+      setLoading(true);
+      const doc = await addDoc(collection(db, "tweets"), {
+        tweet,
+        createAt: Date.now(),
+        username: user.displayName || "Anonymous",
+        userId: user.uid,
+      });
+      if (file) {
+        const locationRef = ref(
+          storage,
+          `tweets/${user.uid}-${user.displayName}/${doc.id}`
+        );
+        const result = await uploadBytes(locationRef, file);
+        const url = await getDownloadURL(result.ref);
+        await updateDoc(doc, {
+          photo: url,
+        });
+      }
+      setTweet("");
+      setFile(null);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form action="" className="flex flex-col gap-2 ">
+    <form onSubmit={onSubmit} className="flex flex-col gap-2 ">
       <textarea
         rows={5}
         maxLength={180}
-        onChange={onChagne}
+        required
+        onChange={onChange}
         value={tweet}
         className="p-5 rounded-2xl text-base navBorder text-white bg-black w-full resize-none placeholder:text-base placeholder:font-sans focus:outline-none focus:border-blue-500"
         placeholder="무슨 일이 일어났나요?"
